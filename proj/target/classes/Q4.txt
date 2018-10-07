@@ -1,0 +1,25 @@
+Assuming spark.dynamicAllocation.enabled property is turned on for dynamic allocation in the spark cluster.
+Each spark executor will have the same number of cores(# of concurrent tasks per executor) and memory.
+The cores/memory of each executor can be set either when submitting the job in spark-shell(by --executor-cores --executor-memory) 
+OR by specifying properties like spark.executor.cores and spark.executor.memory in the spark-defaults.conf OR in the SparkConf object.
+
+The yarn.nodemanager.resource.memory-mb controls the maximum sum of memory used by the containers on each node.
+yarn.nodemanager.resource.cpu-vcores controls the maximum sum of cores used by containers on each node.
+The application Master in YARN will request for more executors on having pending tasks or request to free few executors when idle.
+The # of executors will depend on the maximum memory and maximum cores available in the container and the cores+memory set for each executor
+
+For example :
+Assuming there's a cluster with 6 Nodes where each node has 16 cores and 64GB memory.
+Lets leave ~1 GB and 1 core for system processes(OS,daemons..)
+
+Bad allocation of resources : --num-executors 6 --executor-cores 15 --executor-memory 63G
+Reason : The application master will take one core on any one node,so it can't have all 15 cores on that node.
+Plus 15 cores per executor will also lead to bad HDFS I/O throughput.High memory will lead to too much Garbage Collection.
+
+Good allocation of resources : --num-executors 17 --executor-cores 5 --executor-memory 19G
+Reason : The node with Application Master will have two executors , and all other nodes will have three executors
+Executor memory per executor = ~63GB(per node)/3(per node) - overhead memory = ~19G
+
+Running executors with too much memory results in delays due to excess garbage collection.
+Having lots of concurrent tasks (cores) results in bad I/O throughput.
+Running tiny executors(single core and just enough memory for one task) results in having no benefits from running multiple tasks

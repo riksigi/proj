@@ -1,0 +1,60 @@
+Steps/Prerequisites for ETL Pipeline Automated Testing 
+
+1) Identification of tests and its scope : 
+We need to identify which types of test should and could run,determine the scope and scale of the functional tests.
+We need to consider the time to set up, time for getting feedback,time to develop those tests , maintenance overhead,coverage,cost etc. 
+Tests can be : Unit tests to quickly test a class,Component tests to test an entire job,Integration tests to combine sequential jobs as a system to test,End to End tests to test most of the jobs in the pipeline,Black-box tests to test the entire pipeline in a black box mode with an input and output 
+
+2) Setting up of test environment :
+We need to be careful here if the set up can be done on a local machine or do we need to include cloud services in case the system depends on it.
+Again running a local version of these cloud services will be different from running in the actual cloud.
+
+3) Generating dynamic test inputs :
+The input might be a file with a format(json,xml,csv) with a set of inputs and expected outputs.
+Creating static test input is hard to maintain. Its best to have scripts to generate large test inputs with high variance to cover edge cases as well.
+And scripts are easy to maintain and can be reused.
+
+4) Defining test oracle
+Here we should avoid full comparison of records,rather we should only compare attributes relevant to the test.
+Other things to check would be validity of business rules,validity of data types, validity of attributes based on certain constraints,validation logic for duplicate records etc.
+
+5) Continuous integration of tests
+All tests should be a part of CICD system like Jenkins. 
+Units tests can be executed as soon as code is committed in version control repository and more time taking tests like end to end can run as part of nightly build.
+
+Procedures/getting to a number which shows our test coverage is measurable and improving over time
+1) Formal Model : We can start with a formal model where our ETL rule is mapped to a model.
+The flow chart model breaks down into chunks and "if this,then that" makes each step a test component , which makes the tester know exactly what needs to be validated.
+This helps to reduce incompleteness and eliminates missing logic to create test cases that are 100% of possible combinations.
+The expected result can also be defined in the model which will define what needs to be accepted and rejected by the validation rule.
+
+2) Automatic derivation of test cases from the model : The model approach eliminates the need of manually writing code/copying scripts and sql from source to target database.
+Algorithms can be applied to identify every possible path in the model to generate tests for every combination of input and output.
+Hence testing becomes measurable and testers can easily determine how much functional coverage is provided by the test cases.
+Some optimizations can be done to avoid overtesting like taking into consideration all edges/all nodes/all in/out edges/all pairs in the model etc.
+Its sometimes better to use 10 test cases which takes 30 mins for 95% coverage than 30 tests which takes 3 hours for 100% coverage.
+
+3) Automatic creation of data for test execution
+The data can be derived from the model(which can be provided with the model) or can be created automatically or can be drawn from multiple places in a parallel manner.
+Data generation engine like CA Test Data Manager,Data Painter tools etc. can be used . Output names,variables,default values can be defined for each node and the data needed to execute them can be automatically generated using data generation functions,seed tables etc.
+Data can also be found in multiple back end systems in few minutes with the use of automated data mining.
+
+4) Provisioning of data quickly and matching them to right tests
+A Test mart can be created to match the data to specific tests which eliminates the time to search for data in large data sources.
+The gold copy of data and associated queries to extract them is stored in a test data warehouse so that the data sets can be cloned and delivered simultaneously into multiple systems.
+Combining existing production data with creation of new data brings the coverage upto 100%.There can be a version control system in the data to reflect changes in data with the changes in the model.
+
+5) Automatic execution of tests and comparison of results
+Data Driven automation can be done using test automation engines like CA Technologies where data matching to specific tests along with expected results can be taken and passed through a validation rule ultimately producing pass/fail results for each test.
+
+6) Automatic implementation of changes
+Since the test cases and data are closely attached with each other in the model, any changes in the model can be quickly reflected in the tests and data.
+When any new component/block is added in the model, completeness check algorithms validate the model and update the test cases needed to to retain 100% of functional coverage.
+Version controlling also helps to remain up to date with the new model,its new test cases and new data in the test data warehouse.
+Over time as ETL models become complex, the automatic implementation of changes makes it easy to keep up with tests and data without manual,slow and buggy creation of tests and data.
+
+
+
+
+
+

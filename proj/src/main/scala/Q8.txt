@@ -1,0 +1,39 @@
+Improving overall performance of the system :
+
+First running total of 1000 executors with 1 g of memory might be equivalent to running a large number of tiny executors with very small memory and tiny no of cores.
+Hence there wont be any parallelism benefit of running multiple tasks.It needs to be sized to an appropriate amount of executors,memory per executor and cores per executor to benefit maximum parallelism in the cluster.
+A suggested allocation of resources would be :
+ Total of 58 executors . Each executor will have 21GB and 3 cores
+ It's distribution can be done in following way :
+ 
+ For 11 Nodes : There will be a total of 55 executors running.
+ Thus for each of these nodes : there will be 5 executors running.
+ Total cores used for each node : 3 cores/exec * 5 exec = 15 cores out of allocated 16 cores
+ Total memory used for each node : 21 GB/exec * 5 exec = 105 GB out of allocated 112 GB(its good to keep some memory for overhead and other system processes)
+
+For 1 Node running driver : Driver will take 30GB + ~ 1-2 cores. Additionally there will be 2 executors which will take 72GB in total and 6 cores in total.
+Hence total cores used for this node = 2+6=8 cores
+Total memory used for this node = 30+72=102 GB 
+
+It will be useful to turn on dynamic allocation so that the application Master in YARN will request for more executors on having pending tasks or request to free few executors when idle.
+
+Other things to watch out for tuning the system for better performance : 
+
+Serializing the data or switching to Kyro Serializer for faster operations
+Avoiding udf's. 
+Checking for data locality properties.Configuring how long spark waits for a CPU to free up if the tasks are long and have poor locality.
+Checking for heterogeneous process time i.e if one task is significantly slower than the others then it will extend job duration and waste resources of faster executors
+Tuning Garbage Collection by reducing too many or long lasting GC's 
+Checking what fraction of JVM heap space is used for execution and used for caching 
+Caching collections/serialized objects that will be used more than once
+Optimizing the # of partitions for the RDD's used 
+Making sure if we really need to join 7 tables as joins are expensive and if we can reduce the # of aggregations .
+Looking at the spark's execution plan in the UI for reducing shuffling of data over the network may be by broadcasting or by hash partitioning of RDD's by keys, reducing number of stages per job.
+Using narrow transformations instead of wide ones so that the data for processing resides on one partition instead of multiple to avoid shuffling
+To join two grouped data sets and keep them grouped we should use cogroup() rather than flatMap-join-groupBy pattern
+...etc
+
+ 
+
+ 
+ 
